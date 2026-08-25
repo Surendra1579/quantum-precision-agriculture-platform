@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriVision DSS — Precision Agriculture Intelligence Platform</title>
+  <meta name="description"
+    content="AgriVision DSS: Enterprise Quantum AI-Based Precision Agriculture Decision Support Platform featuring Sentinel-2 Earth Observation, Soil Intelligence, FAO-56 Agro-Meteorology, and Hybrid Quantum Neural Networks.">
+
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Leaflet CSS for Interactive Field Mapping -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Leaflet JS CDN -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Application Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+  <div class="layout-container">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar" id="main-sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-badge-icon">🌾</div>
+        <div class="brand-info">
+          <h2 class="brand-heading">AgriVision AI</h2>
+          <span class="brand-subheading">Precision Agriculture Platform</span>
+        </div>
+      </div>
+
+      <div class="sidebar-status-pill status-waking" id="sidebar-quantum-status"
+        title="Click to view Backend Connection & Health Status" tabindex="0" role="button">
+        <span class="status-pulse-dot"></span>
+        <span id="sidebar-status-label">Connecting to API...</span>
+      </div>
+
+      <nav class="sidebar-nav" id="sidebar-nav-menu">
+        <div class="nav-section-title">MAIN WORKSPACE</div>
+        <button class="nav-link active" data-view="view-dashboard" id="nav-dashboard">
+          <span class="nav-icon">📊</span>
+          <span class="nav-text">Dashboard</span>
+        </button>
+
+        <button class="nav-link" data-view="view-yield" id="nav-yield">
+          <span class="nav-icon">🌾</span>
+          <span class="nav-text">Crop Yield</span>
+          <span class="nav-pill nav-pill-emerald">HQNN</span>
+        </button>
+
+        <button class="nav-link" data-view="view-price" id="nav-price">
+          <span class="nav-icon">📈</span>
+          <span class="nav-text">Commodity Price</span>
+          <span class="nav-pill nav-pill-amber">VQR</span>
+        </button>
+
+        <div class="nav-section-title">EARTH & SOIL INTELLIGENCE</div>
+        <button class="nav-link" data-view="view-satellite" id="nav-satellite">
+          <span class="nav-icon">🛰️</span>
+          <span class="nav-text">Satellite</span>
+          <span class="nav-pill nav-pill-cyan">Sentinel-2</span>
+        </button>
+
+        <button class="nav-link" data-view="view-weather" id="nav-weather">
+          <span class="nav-icon">🌤️</span>
+          <span class="nav-text">Weather</span>
+          <span class="nav-pill nav-pill-indigo">ET₀</span>
+        </button>
+
+        <button class="nav-link" data-view="view-soil" id="nav-soil">
+          <span class="nav-icon">🧪</span>
+          <span class="nav-text">Soil Health</span>
+          <span class="nav-pill nav-pill-rose">NPK 4R</span>
+        </button>
+
+        <div class="nav-section-title">DECISION SUPPORT & PLOTS</div>
+        <button class="nav-link" data-view="view-recommendation" id="nav-recommendation">
+          <span class="nav-icon">🎯</span>
+          <span class="nav-text">Precision Recommendation</span>
+        </button>
+
+        <button class="nav-link" data-view="view-myfarm" id="nav-myfarm">
+          <span class="nav-icon">🗺️</span>
+          <span class="nav-text">My Farm (Plots)</span>
+        </button>
+
+        <div class="nav-section-title">QUANTUM & SCHEMES</div>
+        <button class="nav-link" data-view="view-analytics" id="nav-analytics">
+          <span class="nav-icon">⚛️</span>
+          <span class="nav-text">Analytics & VQC</span>
+        </button>
+
+        <button class="nav-link" data-view="view-government" id="nav-government">
+          <span class="nav-icon">🏛️</span>
+          <span class="nav-text">Government Support</span>
+        </button>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <div class="footer-telemetry">
+          <small>Qubits: <strong id="foot-qubits">8</strong> | Depth: <strong id="foot-depth">8</strong></small>
+          <div class="system-status-indicator" id="sidebar-foot-status-box"
+            title="Click to view Backend Connection Settings" style="cursor: pointer;">
+            <span class="online-indicator status-waking"></span> <span id="foot-status-text">Connecting...</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT VIEWPORT -->
+    <div class="main-viewport">
+
+      <!-- TOP NAVIGATION BAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-toggle-btn" id="btn-toggle-sidebar" aria-label="Toggle Navigation">☰</button>
+          <div class="location-context-selector">
+            <span class="location-icon">📍</span>
+            <select id="global-state-select" class="location-select" title="Active State">
+              <option value="Andhra Pradesh">Andhra Pradesh</option>
+            </select>
+            <select id="global-district-select" class="location-select" title="Active District">
+              <option value="Guntur">Guntur</option>
+            </select>
+            <button class="btn-refresh-telemetry" id="btn-refresh-global" title="Sync Live Geospatial & Weather Data">
+              🔄 Sync Live Data
+            </button>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="ticker-badge" id="top-alert-ticker">
+            <span class="ticker-icon">🌤️</span>
+            <span id="ticker-text">Weather: 28.5°C | Optimal Spraying Window | NDVI: 0.62 (Healthy)</span>
+          </div>
+          <a href="https://quantum-precision-agriculture-api.onrender.com/docs" target="_blank" id="btn-topbar-docs"
+            class="btn-api-docs" title="Interactive Swagger REST Documentation">
+            <span>⚡ API Docs</span>
+          </a>
+        </div>
+      </header>
+
+      <!-- VIEW 1: EXECUTIVE DASHBOARD -->
+      <main class="view-content active" id="view-dashboard">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">🌾 Executive Agriculture Decision Support Dashboard</h1>
+            <p class="view-subtitle">Real-time fusion of Hybrid Quantum AI, Sentinel-2 multi-spectral indices, FAO-56
+              evapotranspiration, and Soil Health telemetry.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn-primary btn-emerald" onclick="switchView('view-recommendation')">
+              <span>🚀 Generate Precision Farm Prescription</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Top KPI Cards Grid -->
+        <div class="kpi-grid">
+
+          <div class="kpi-card kpi-card-emerald">
+            <div class="kpi-icon-box">🌱</div>
+            <div class="kpi-body">
+              <div class="kpi-label">Field Vegetation Health</div>
+              <div class="kpi-value" id="dash-ndvi-value">NDVI 0.62</div>
+              <div class="kpi-subtext" id="dash-ndvi-status"><span class="badge badge-emerald">Optimal Canopy
+                  Vigor</span></div>
+            </div>
+          </div>
+
+          <div class="kpi-card kpi-card-amber">
+            <div class="kpi-icon-box">📈</div>
+            <div class="kpi-body">
+              <div class="kpi-label">Quantum Price Regressor (VQR)</div>
+              <div class="kpi-value" id="dash-price-stat">₹ 7,265 / Qtl</div>
+              <div class="kpi-subtext"><span class="badge badge-amber">8-Qubit Variational Circuit</span></div>
+            </div>
+          </div>
+
+          <div class="kpi-card kpi-card-cyan">
+            <div class="kpi-icon-box">🧪</div>
+            <div class="kpi-body">
+              <div class="kpi-label">Soil Health Index</div>
+              <div class="kpi-value" id="dash-soil-score">82.5 / 100</div>
+              <div class="kpi-subtext"><span class="badge badge-cyan">Grade A (Highly Fertile)</span></div>
+            </div>
+          </div>
+
+          <div class="kpi-card kpi-card-indigo">
+            <div class="kpi-icon-box">💧</div>
+            <div class="kpi-body">
+              <div class="kpi-label">Reference Evapotranspiration</div>
+              <div class="kpi-value" id="dash-et0-stat">4.62 mm/day</div>
+              <div class="kpi-subtext"><span class="badge badge-indigo">FAO-56 Penman-Monteith</span></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Dashboard Two Columns -->
+        <div class="dashboard-grid-two">
+
+          <!-- Live Field Map & Satellite Overview -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-header-titles">
+                <h3 class="card-title">🗺️ Geospatial Field & Satellite Telemetry</h3>
+                <p class="card-desc">Sentinel-2 multi-spectral overlay with interactive district locator and field
+                  bounds.</p>
+              </div>
+              <div class="card-badge">Live Map</div>
+            </div>
+            <div class="card-body">
+              <div id="dash-map-container" class="leaflet-map-box"></div>
+              <div class="satellite-quick-stats">
+                <div class="mini-stat">
+                  <span class="mini-stat-label">EVI Biomass</span>
+                  <strong class="mini-stat-val" id="dash-evi-stat">0.48</strong>
+                </div>
+                <div class="mini-stat">
+                  <span class="mini-stat-label">Canopy Water (NDWI)</span>
+                  <strong class="mini-stat-val" id="dash-ndwi-stat">+0.22</strong>
+                </div>
+                <div class="mini-stat">
+                  <span class="mini-stat-label">Surface Temp (LST)</span>
+                  <strong class="mini-stat-val" id="dash-lst-stat">31.5 °C</strong>
+                </div>
+                <div class="mini-stat">
+                  <span class="mini-stat-label">Soil Moisture</span>
+                  <strong class="mini-stat-val" id="dash-moist-stat">0.28 m³/m³</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Agro-Weather Alerts & Quick Launchpad -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-header-titles">
+                <h3 class="card-title">⚠️ Active Agro-Climatic Alerts & Advisories</h3>
+                <p class="card-desc">Early hazard warning triggers for heatwaves, blight humidity, and pest outbreaks.
+                </p>
+              </div>
+            </div>
+            <div class="card-body">
+              <div id="dash-alerts-container" class="alerts-list-box">
+                <div class="alert-item alert-item-info">
+                  <span class="alert-item-icon">🌤️</span>
+                  <div>
+                    <strong>Optimal Spraying Conditions</strong>
+                    <p>Wind speed (12 km/h) and temperature (28°C) are favorable for foliar micronutrient application.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="quick-launchpad" style="margin-top: 20px;">
+                <h4 style="font-size: 0.95rem; margin-bottom: 10px; color: var(--text-secondary);">⚡ Quick Decision
+                  Workflows</h4>
+                <div class="launchpad-grid">
+                  <button class="btn-launch" onclick="switchView('view-yield')">🌾 Predict Crop Yield</button>
+                  <button class="btn-launch" onclick="switchView('view-price')">📈 Market Price Forecast</button>
+                  <button class="btn-launch" onclick="switchView('view-soil')">🧪 4R Fertilizer Planner</button>
+                  <button class="btn-launch" onclick="switchView('view-myfarm')">🗺️ Manage Farm Plots</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+
+      <!-- VIEW 2: CROP YIELD PREDICTOR (HQNN) -->
+      <main class="view-content" id="view-yield">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">🌾 Hybrid Quantum Neural Network (HQNN) Yield Predictor</h1>
+            <p class="view-subtitle">Parameterizes 8-Qubit Variational Quantum Circuit with live satellite vegetation
+              indices and soil metrics.</p>
+          </div>
+        </div>
+
+        <div class="grid-two-columns">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🌱 Farm & Agronomic Parameters</h3>
+              <p class="card-desc">Provide agricultural metrics or select a saved plot to auto-fill telemetry.</p>
+            </div>
+            <form id="yield-form" class="card-body">
+              <div class="form-grid">
+
+                <div class="form-group">
+                  <label class="form-label" for="yield-crop">Target Crop</label>
+                  <select id="yield-crop" class="form-control" required>
+                    <option value="" selected>Select Crop</option>
+                    <option value="Rice">Rice (Paddy)</option>
+                    <option value="Cotton">Cotton</option>
+                    <option value="Wheat">Wheat</option>
+                    <option value="Maize">Maize</option>
+                    <option value="Groundnut">Groundnut</option>
+                    <option value="Tomato">Tomato</option>
+                    <option value="Chilli">Chilli</option>
+                    <option value="Sugarcane">Sugarcane</option>
+                    <option value="Onion">Onion</option>
+                    <option value="Pulses">Pulses</option>
+                    <option value="Soyabean">Soyabean</option>
+                    <option value="Potato">Potato</option>
+                    <option value="Mustard">Mustard</option>
+                    <option value="Jowar">Jowar</option>
+                    <option value="Bajra">Bajra</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="yield-season">Farming Season</label>
+                  <select id="yield-season" class="form-control" required>
+                    <option value="" selected>Select Season</option>
+                    <option value="Kharif">Kharif (Monsoon)</option>
+                    <option value="Rabi">Rabi (Winter)</option>
+                    <option value="Whole Year">Whole Year</option>
+                    <option value="Summer">Summer / Zaid</option>
+                    <option value="Autumn">Autumn</option>
+                    <option value="Winter">Winter</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="yield-state">State / Region</label>
+                  <select id="yield-state" class="form-control" required>
+                    <option value="" selected>Select State</option>
+                    <option value="Andhra Pradesh">Andhra Pradesh</option>
+                    <option value="Telangana">Telangana</option>
+                    <option value="Tamil Nadu">Tamil Nadu</option>
+                    <option value="Karnataka">Karnataka</option>
+                    <option value="Maharashtra">Maharashtra</option>
+                    <option value="Gujarat">Gujarat</option>
+                    <option value="Punjab">Punjab</option>
+                    <option value="Haryana">Haryana</option>
+                    <option value="Uttar Pradesh">Uttar Pradesh</option>
+                    <option value="Madhya Pradesh">Madhya Pradesh</option>
+                    <option value="West Bengal">West Bengal</option>
+                    <option value="Bihar">Bihar</option>
+                    <option value="Rajasthan">Rajasthan</option>
+                    <option value="Odisha">Odisha</option>
+                    <option value="Kerala">Kerala</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="yield-district">District</label>
+                  <select id="yield-district" class="form-control" required>
+                    <option value="" selected>Select District</option>
+                    <option value="Guntur">Guntur</option>
+                    <option value="Krishna">Krishna</option>
+                    <option value="East Godavari">East Godavari</option>
+                    <option value="West Godavari">West Godavari</option>
+                    <option value="Kurnool">Kurnool</option>
+                    <option value="Anantapur">Anantapur</option>
+                    <option value="Chittoor">Chittoor</option>
+                    <option value="Visakhapatnam">Visakhapatnam</option>
+                    <option value="Nellore">Nellore</option>
+                    <option value="Prakasam">Prakasam</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="yield-year">Crop Year</label>
+                  <input type="number" id="yield-year" class="form-control" value="2024" min="2000" max="2030" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="yield-area">Cultivated Area (Acres)</label>
+                  <input type="number" id="yield-area" class="form-control" step="0.1" value="10.0" min="0.1" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="yield-fertilizer">Fertilizer (kg total)</label>
+                  <input type="number" id="yield-fertilizer" class="form-control" step="0.1" value="850.0" min="0"
+                    required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="yield-pesticide">Pesticide (kg total)</label>
+                  <input type="number" id="yield-pesticide" class="form-control" step="0.1" value="45.0" min="0"
+                    required>
+                </div>
+
+              </div>
+
+              <div class="banner-note banner-note-emerald" style="margin-top: 14px; margin-bottom: 16px;">
+                <span>🛰️</span>
+                <span>Annual Rainfall, NDVI, EVI, Soil Moisture, and LST are automatically retrieved and encoded into 8
+                  quantum state vectors.</span>
+              </div>
+
+              <button type="submit" id="yield-submit-btn" class="btn-submit btn-emerald">
+                <span>🚀 Execute Quantum Yield Inference</span>
+              </button>
+            </form>
+          </div>
+
+          <div class="card result-card">
+            <div class="card-header">
+              <h3 class="card-title">📊 Quantum Yield Prediction Output</h3>
+              <p class="card-desc">Hybrid Quantum-Classical Neural Network forward pass on 8-qubit Pauli-Z expectation
+                register.</p>
+            </div>
+            <div id="yield-result-container" class="card-body">
+              <div class="placeholder-box">
+                <div class="placeholder-icon">⚛️</div>
+                <h3>No Quantum Calculation Executed</h3>
+                <p>Fill out farm parameters on the left and click Predict to execute quantum inference.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- VIEW 3: COMMODITY PRICE FORECAST (VQR) -->
+      <main class="view-content" id="view-price">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">📈 Variational Quantum Regressor (VQR) Commodity Price Forecast</h1>
+            <p class="view-subtitle">Trains parameterized ansatz on historical APMC mandi arrivals, price lags, and
+              volatility bounds.</p>
+          </div>
+        </div>
+
+        <div class="grid-two-columns">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">📊 Mandi & Commodity Selection</h3>
+              <p class="card-desc">Select target market and commodity parameters for quantum forecasting.</p>
+            </div>
+            <form id="price-form" class="card-body">
+              <div class="form-grid">
+
+                <div class="form-group">
+                  <label class="form-label" for="price-state">State</label>
+                  <select id="price-state" class="form-control form-control-amber" required>
+                    <option value="" selected>Select State</option>
+                    <option value="Gujarat">Gujarat</option>
+                    <option value="Andhra Pradesh">Andhra Pradesh</option>
+                    <option value="Maharashtra">Maharashtra</option>
+                    <option value="Karnataka">Karnataka</option>
+                    <option value="Tamil Nadu">Tamil Nadu</option>
+                    <option value="Telangana">Telangana</option>
+                    <option value="Punjab">Punjab</option>
+                    <option value="Haryana">Haryana</option>
+                    <option value="Uttar Pradesh">Uttar Pradesh</option>
+                    <option value="Madhya Pradesh">Madhya Pradesh</option>
+                    <option value="Rajasthan">Rajasthan</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="price-district">District</label>
+                  <select id="price-district" class="form-control form-control-amber" required>
+                    <option value="" selected>Select District</option>
+                    <option value="Amreli">Amreli</option>
+                    <option value="Ahmedabad">Ahmedabad</option>
+                    <option value="Anand">Anand</option>
+                    <option value="Rajkot">Rajkot</option>
+                    <option value="Surat">Surat</option>
+                    <option value="Vadodara">Vadodara</option>
+                    <option value="Bhavnagar">Bhavnagar</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="price-market">Market (APMC Mandi)</label>
+                  <select id="price-market" class="form-control form-control-amber" required>
+                    <option value="" selected>Select Market</option>
+                    <option value="Damnagar">Damnagar</option>
+                    <option value="Savarkundla">Savarkundla</option>
+                    <option value="Amreli Main Mandi">Amreli Main Mandi</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="price-commodity">Commodity</label>
+                  <select id="price-commodity" class="form-control form-control-amber" required>
+                    <option value="" selected>Select Commodity</option>
+                    <option value="Cotton">Cotton</option>
+                    <option value="Wheat">Wheat</option>
+                    <option value="Rice">Rice</option>
+                    <option value="Maize">Maize</option>
+                    <option value="Groundnut">Groundnut</option>
+                    <option value="Tomato">Tomato</option>
+                    <option value="Onion">Onion</option>
+                    <option value="Chilli">Chilli</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="price-variety">Variety</label>
+                  <select id="price-variety" class="form-control form-control-amber" required>
+                    <option value="" selected>Select Variety</option>
+                    <option value="Other">Other</option>
+                    <option value="Standard Variety">Standard Variety</option>
+                    <option value="Hybrid">Hybrid</option>
+                    <option value="Average (Whole)">Average (Whole)</option>
+                    <option value="FAQ">FAQ</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="price-grade">Grade</label>
+                  <select id="price-grade" class="form-control form-control-amber" required>
+                    <option value="" selected>Select Grade</option>
+                    <option value="FAQ">FAQ</option>
+                    <option value="Non-FAQ">Non-FAQ</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Large">Large</option>
+                    <option value="Small">Small</option>
+                  </select>
+                </div>
+
+                <div class="form-group full-width">
+                  <label class="form-label" for="price-date">Prediction Target Date</label>
+                  <input type="date" id="price-date" class="form-control form-control-amber" value="2026-08-22"
+                    required>
+                </div>
+
+              </div>
+
+              <button type="submit" id="price-submit-btn" class="btn-submit btn-amber">
+                <span>📈 Forecast Quantum Market Price</span>
+              </button>
+            </form>
+          </div>
+
+          <div class="card result-card">
+            <div class="card-header">
+              <h3 class="card-title">💰 Quantum Price Forecast & Lag Trajectory</h3>
+              <p class="card-desc">7-Day price trajectory and quantum volatility interval bounds.</p>
+            </div>
+            <div id="price-result-container" class="card-body">
+              <div class="placeholder-box">
+                <div class="placeholder-icon">💹</div>
+                <h3>No Forecast Generated</h3>
+                <p>Select commodity and market parameters to execute variational quantum price regression.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- VIEW 4: SATELLITE INTELLIGENCE -->
+      <main class="view-content" id="view-satellite">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">🛰️ Satellite Earth Observation Intelligence</h1>
+            <p class="view-subtitle">High-resolution Sentinel-2 and Landsat indices: NDVI, EVI, NDWI (Canopy Moisture),
+              VHI (Vegetation Health), and Land Surface Temperature (LST).</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn-primary btn-cyan" id="btn-fetch-sat-manual">
+              <span>🛰️ Refresh Satellite Image</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="satellite-kpi-row">
+          <div class="sat-kpi-card">
+            <div class="sat-kpi-title">NDVI Index</div>
+            <div class="sat-kpi-val" id="sat-page-ndvi">0.62</div>
+            <div class="sat-kpi-desc" id="sat-page-ndvi-desc">High Vegetative Vigor</div>
+          </div>
+          <div class="sat-kpi-card">
+            <div class="sat-kpi-title">EVI Biomass</div>
+            <div class="sat-kpi-val" id="sat-page-evi">0.48</div>
+            <div class="sat-kpi-desc">Dense Canopy Cover</div>
+          </div>
+          <div class="sat-kpi-card">
+            <div class="sat-kpi-title">NDWI Water Index</div>
+            <div class="sat-kpi-val" id="sat-page-ndwi">+0.22</div>
+            <div class="sat-kpi-desc">Optimal Hydration</div>
+          </div>
+          <div class="sat-kpi-card">
+            <div class="sat-kpi-title">Vegetation Health (VHI)</div>
+            <div class="sat-kpi-val" id="sat-page-vhi">78.5</div>
+            <div class="sat-kpi-desc">No Agricultural Drought</div>
+          </div>
+          <div class="sat-kpi-card">
+            <div class="sat-kpi-title">Land Surface Temp (LST)</div>
+            <div class="sat-kpi-val" id="sat-page-lst">31.5 °C</div>
+            <div class="sat-kpi-desc">Optimal Thermal Range</div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid-two" style="margin-top: 20px;">
+          <!-- Satellite Map & Spatial Raster Heatmap -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🗺️ High-Resolution Field Raster Heatmap (5x5 Grid)</h3>
+              <p class="card-desc">Spatial vegetation vigor distribution across plot micro-zones.</p>
+            </div>
+            <div class="card-body">
+              <div id="satellite-map-container" class="leaflet-map-box"></div>
+              <div class="ndvi-colormap-legend">
+                <span>Barren / Water (&lt;0.2)</span>
+                <div class="colormap-gradient"></div>
+                <span>Dense Vigor (&gt;0.75)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 12-Month Vegetation Trajectory Chart -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">📊 12-Month Seasonal Vegetation Trajectory</h3>
+              <p class="card-desc">Historical seasonal phenology cycle (NDVI vs. EVI vs. Temperature).</p>
+            </div>
+            <div class="card-body">
+              <div style="height: 320px; position: relative;">
+                <canvas id="satellite-timeseries-chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- VIEW 5: ADVANCED WEATHER INTELLIGENCE -->
+      <main class="view-content" id="view-weather">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">🌤️ Advanced Agro-Meteorological Intelligence</h1>
+            <p class="view-subtitle">7-Day agro-weather forecast, FAO-56 Penman-Monteith Reference Evapotranspiration
+              (ET₀), solar radiation, and disease microclimate alerts.</p>
+          </div>
+        </div>
+
+        <div class="weather-current-grid">
+          <div class="weather-stat-card">
+            <div class="weather-stat-icon">🌡️</div>
+            <div class="weather-stat-val" id="w-temp">28.5 °C</div>
+            <div class="weather-stat-lbl">Air Temperature (Min: <span id="w-min">22°C</span> | Max: <span
+                id="w-max">34°C</span>)</div>
+          </div>
+
+          <div class="weather-stat-card">
+            <div class="weather-stat-icon">💧</div>
+            <div class="weather-stat-val" id="w-humid">68 %</div>
+            <div class="weather-stat-lbl">Relative Humidity</div>
+          </div>
+
+          <div class="weather-stat-card">
+            <div class="weather-stat-icon">💨</div>
+            <div class="weather-stat-val" id="w-wind">12.0 km/h</div>
+            <div class="weather-stat-lbl">Wind Speed (<span id="w-spray">Optimal Spray Window</span>)</div>
+          </div>
+
+          <div class="weather-stat-card">
+            <div class="weather-stat-icon">☀️</div>
+            <div class="weather-stat-val" id="w-solar">19.2 MJ/m²</div>
+            <div class="weather-stat-lbl">Solar Radiation</div>
+          </div>
+
+          <div class="weather-stat-card">
+            <div class="weather-stat-icon">🚿</div>
+            <div class="weather-stat-val" id="w-et0">4.62 mm/d</div>
+            <div class="weather-stat-lbl">Reference Evapotranspiration (ET₀)</div>
+          </div>
+        </div>
+
+        <!-- 7-Day Forecast Cards -->
+        <div class="card" style="margin-top: 20px;">
+          <div class="card-header">
+            <h3 class="card-title">📅 7-Day Agro-Weather Forecast & Daily Evapotranspiration</h3>
+            <p class="card-desc">Daily precipitation probability, temperature ranges, and crop water loss calculations.
+            </p>
+          </div>
+          <div class="card-body">
+            <div class="forecast-cards-row" id="forecast-cards-container">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Hourly Forecast Chart -->
+        <div class="card" style="margin-top: 20px;">
+          <div class="card-header">
+            <h3 class="card-title">📈 24-Hour Temperature & Humidity Progression</h3>
+            <p class="card-desc">Diurnal curve for spray planning and frost/heatwave mitigation.</p>
+          </div>
+          <div class="card-body">
+            <div style="height: 280px; position: relative;">
+              <canvas id="weather-hourly-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- VIEW 6: SOIL INTELLIGENCE & 4R FERTILIZER PLANNER -->
+      <main class="view-content" id="view-soil">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">🧪 Soil Health Intelligence & 4R Fertilizer Planner</h1>
+            <p class="view-subtitle">NPK adequacy evaluation, Soil Health Index (0-100), pH correction with Lime/Gypsum,
+              and target-yield fertilizer dosage calculations.</p>
+          </div>
+        </div>
+
+        <div class="grid-two-columns">
+          <!-- Soil Input Form -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">📋 Soil Health Card Parameters</h3>
+              <p class="card-desc">Input lab test metrics or auto-fill with SoilGrids regional survey database.</p>
+            </div>
+            <form id="soil-test-form" class="card-body">
+              <div class="form-grid">
+
+                <div class="form-group">
+                  <label class="form-label" for="soil-n">Nitrogen (N in kg/ha)</label>
+                  <input type="number" id="soil-n" class="form-control" value="240" step="1" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="soil-p">Phosphorus (P in kg/ha)</label>
+                  <input type="number" id="soil-p" class="form-control" value="16.5" step="0.1" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="soil-k">Potassium (K in kg/ha)</label>
+                  <input type="number" id="soil-k" class="form-control" value="220" step="1" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="soil-ph">Soil pH (4.0 - 10.0)</label>
+                  <input type="number" id="soil-ph" class="form-control" value="7.2" step="0.1" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="soil-oc">Organic Carbon (%)</label>
+                  <input type="number" id="soil-oc" class="form-control" value="0.55" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="soil-ec">EC (dS/m Salinity)</label>
+                  <input type="number" id="soil-ec" class="form-control" value="0.50" step="0.05" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="soil-zn">Zinc (ppm)</label>
+                  <input type="number" id="soil-zn" class="form-control" value="0.75" step="0.05">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="soil-b">Boron (ppm)</label>
+                  <input type="number" id="soil-b" class="form-control" value="0.52" step="0.05">
+                </div>
+
+              </div>
+
+              <div style="display: flex; gap: 10px; margin-top: 16px;">
+                <button type="button" id="btn-autofill-soil" class="btn-submit"
+                  style="background: rgba(99, 102, 241, 0.2); border: 1px solid #818cf8; color: #a5b4fc;">
+                  <span>📍 Auto-Fill Regional Baseline</span>
+                </button>
+                <button type="submit" class="btn-submit btn-rose">
+                  <span>🧪 Evaluate Soil Health & 4R Dose</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Soil Evaluation Output -->
+          <div class="card result-card">
+            <div class="card-header">
+              <h3 class="card-title">📊 Soil Health Score & NPK Diagnostic</h3>
+              <p class="card-desc">ICAR benchmark compliance and fertilizer prescription.</p>
+            </div>
+            <div id="soil-result-container" class="card-body">
+              <div class="placeholder-box">
+                <div class="placeholder-icon">🧪</div>
+                <h3>No Soil Analysis Executed</h3>
+                <p>Click Evaluate Soil Health to compute Soil Health Score, NPK balance, and commercial bag
+                  requirements.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- VIEW 7: PRECISION AGRICULTURE RECOMMENDATION ENGINE -->
+      <main class="view-content" id="view-recommendation">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">🎯 Precision Agriculture Decision Support Engine</h1>
+            <p class="view-subtitle">End-to-end multi-criteria optimization fusing Quantum Yield HQNN + Quantum Price
+              VQR + Satellite VHI + Weather ET₀ + Soil 4R Stewardship.</p>
+          </div>
+        </div>
+
+        <div class="grid-two-columns">
+          <!-- Recommendation Input -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🚜 Farm Setup & Decision Goals</h3>
+              <p class="card-desc">Define crop and land parameters to run composite quantum optimization.</p>
+            </div>
+            <form id="rec-form" class="card-body">
+              <div class="form-grid">
+
+                <div class="form-group">
+                  <label class="form-label" for="rec-crop">Target Crop</label>
+                  <select id="rec-crop" class="form-control" required>
+                    <option value="" selected>Select Crop</option>
+                    <option value="Rice">Rice (Paddy)</option>
+                    <option value="Cotton">Cotton</option>
+                    <option value="Wheat">Wheat</option>
+                    <option value="Maize">Maize</option>
+                    <option value="Chilli">Chilli</option>
+                    <option value="Tomato">Tomato</option>
+                    <option value="Groundnut">Groundnut</option>
+                    <option value="Sugarcane">Sugarcane</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="rec-season">Season</label>
+                  <select id="rec-season" class="form-control" required>
+                    <option value="" selected>Select Season</option>
+                    <option value="Kharif">Kharif (Monsoon)</option>
+                    <option value="Rabi">Rabi (Winter)</option>
+                    <option value="Summer">Summer / Zaid</option>
+                    <option value="Whole Year">Whole Year</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="rec-area">Cultivated Area (Acres)</label>
+                  <input type="number" id="rec-area" class="form-control" step="0.5" value="5.0" min="0.5" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="rec-year">Crop Year</label>
+                  <input type="number" id="rec-year" class="form-control" value="2024" min="2020" max="2030" required>
+                </div>
+
+              </div>
+
+              <div class="banner-note banner-note-indigo" style="margin-top: 14px; margin-bottom: 16px;">
+                <span>💡</span>
+                <span>The recommendation engine calculates expected yield, mandi realization, gross revenue, cultivation
+                  cost, net profit, 4R fertilizer splits, and irrigation calendar.</span>
+              </div>
+
+              <button type="submit" id="rec-submit-btn" class="btn-submit btn-emerald">
+                <span>🚀 Generate Comprehensive Farm Prescription</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Recommendation Output -->
+          <div class="card result-card">
+            <div class="card-header">
+              <h3 class="card-title">📑 Precision Decision Support Report</h3>
+              <p class="card-desc">Actionable agronomic prescription and financial profit forecast.</p>
+            </div>
+            <div id="rec-result-container" class="card-body">
+              <div class="placeholder-box">
+                <div class="placeholder-icon">🎯</div>
+                <h3>No Decision Report Generated</h3>
+                <p>Select target crop and area, then click Generate to execute multi-variable quantum decision
+                  optimization.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- VIEW 8: MY FARM (PER-PLOT PRECISION FARMING) -->
+      <main class="view-content" id="view-myfarm">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">🗺️ My Farm & Per-Plot Precision Farming</h1>
+            <p class="view-subtitle">Interactive Leaflet boundary drawing, GPS coordinates, GeoJSON polygon import, and
+              plot-specific quantum health analysis.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn-primary btn-emerald" id="btn-open-create-plot">
+              <span>➕ Register New Farm Plot</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="dashboard-grid-two">
+          <!-- Plot Interactive Map -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🗺️ Interactive Field Polygon Boundary Mapper</h3>
+              <p class="card-desc">Click on map to draw polygon field boundary or drop a central GPS coordinate pin.</p>
+            </div>
+            <div class="card-body">
+              <div class="plot-location-bar"
+                style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; background: rgba(255,255,255,0.03); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color);">
+                <div
+                  style="display: flex; align-items: center; gap: 6px; font-size: 0.88rem; color: #34d399; font-weight: 600;">
+                  <span>📍 Target Location:</span>
+                </div>
+                <select id="myfarm-state-select" class="form-control"
+                  style="width: auto; min-width: 150px; padding: 6px 10px; font-size: 0.85rem;" title="Select State">
+                  <option value="Andhra Pradesh">Andhra Pradesh</option>
+                </select>
+                <select id="myfarm-district-select" class="form-control"
+                  style="width: auto; min-width: 150px; padding: 6px 10px; font-size: 0.85rem;" title="Select District">
+                  <option value="Guntur">Guntur</option>
+                </select>
+                <button type="button" class="btn-map-action" id="btn-pan-myfarm-location"
+                  style="background: rgba(16,185,129,0.2); color: #34d399; font-size: 0.82rem; padding: 6px 12px;">
+                  🚀 Pan to District
+                </button>
+                <span id="myfarm-coords-badge" class="badge badge-emerald"
+                  style="font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; margin-left: auto;">
+                  16.3067° N, 80.4365° E
+                </span>
+              </div>
+              <div id="myfarm-map-container" class="leaflet-map-box" style="height: 380px;"></div>
+              <div class="map-controls-row">
+                <button type="button" class="btn-map-action" id="btn-draw-polygon">✏️ Draw Polygon Field</button>
+                <button type="button" class="btn-map-action" id="btn-clear-draw">🗑️ Clear Drawing</button>
+                <span id="draw-status-lbl"
+                  style="font-size: 0.82rem; color: var(--text-muted); align-self: center;">Click "Draw Polygon Field"
+                  and click points on map.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Plot Registration & Saved Plots -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🌾 Registered Farm Plots</h3>
+              <p class="card-desc">Select a plot to inspect live satellite telemetry and run quantum prescriptions.</p>
+            </div>
+            <div class="card-body">
+              <form id="create-plot-form"
+                style="display: none; margin-bottom: 20px; padding: 16px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 12px;">
+                <h4 style="font-size: 0.95rem; margin-bottom: 12px; color: #34d399;">➕ Save Drawn Plot Boundary</h4>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label class="form-label" for="plot-name">Plot Name</label>
+                    <input type="text" id="plot-name" class="form-control" placeholder="e.g. North Acre Paddy Plot"
+                      required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="plot-crop">Crop</label>
+                    <select id="plot-crop" class="form-control">
+                      <option value="" selected>Select Crop</option>
+                      <option value="Rice">Rice</option>
+                      <option value="Cotton">Cotton</option>
+                      <option value="Wheat">Wheat</option>
+                      <option value="Maize">Maize</option>
+                      <option value="Chilli">Chilli</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="plot-soil">Soil Texture</label>
+                    <select id="plot-soil" class="form-control">
+                      <option value="" selected>Select Soil Texture</option>
+                      <option value="Loam">Loam</option>
+                      <option value="Clay">Clay</option>
+                      <option value="Black Soil">Black Cotton Soil</option>
+                      <option value="Sandy">Sandy Loam</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="plot-area">Calculated Area (Acres)</label>
+                    <input type="number" id="plot-area" class="form-control" step="0.1" value="5.0">
+                  </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 12px;">
+                  <button type="submit" class="btn-submit btn-emerald" style="padding: 8px 14px; width: auto;">💾 Save
+                    Plot to Database</button>
+                  <button type="button" class="btn-map-action"
+                    onclick="document.getElementById('create-plot-form').style.display='none'">Cancel</button>
+                </div>
+              </form>
+
+              <div id="plots-list-container" class="plots-grid">
+                <div class="placeholder-box" style="padding: 20px;">
+                  <p>Loading registered farm plots...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Per-Plot Quantum Analysis Results -->
+        <div class="card" id="plot-analysis-result-card" style="margin-top: 20px; display: none;">
+          <div class="card-header">
+            <h3 class="card-title" id="plot-analysis-title">📊 Per-Plot Precision Quantum Analysis</h3>
+            <p class="card-desc">High-resolution zonal telemetry, financial profit forecast, and custom prescriptions.
+            </p>
+          </div>
+          <div class="card-body" id="plot-analysis-body"></div>
+        </div>
+      </main>
+
+      <!-- VIEW 9: ANALYTICS & QUANTUM TELEMETRY -->
+      <main class="view-content" id="view-analytics">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">⚛️ Hybrid Quantum Architecture & Telemetry</h1>
+            <p class="view-subtitle">Parameterized Variational Quantum Circuit (VQC) schematics, gate counts, depth, and
+              retraining controls.</p>
+          </div>
+        </div>
+
+        <div class="grid-two-columns">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🌾 Quantum Crop Yield Model (HQNN)</h3>
+              <p class="card-desc">AngleEmbedding (RY), 3 Strongly Entangling Layers, Circular CNOT Rings.</p>
+            </div>
+            <div class="card-body">
+              <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">
+                Fuses 8-dimensional agricultural tensor (Crop, Season, Rainfall, Fertilizer, Pesticide, NDVI, EVI, LST)
+                into quantum Hilbert space with Pauli-Z expectation value measurements.
+              </p>
+              <button id="btn-retrain-yield" class="btn-submit btn-emerald" style="width: auto;">
+                <span>⚡ Retrain Yield Quantum QNN</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">📈 Quantum Price Model (VQR)</h3>
+              <p class="card-desc">Variational Quantum Regressor with 7-day temporal lag features.</p>
+            </div>
+            <div class="card-body">
+              <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">
+                Trains on temporal APMC arrivals with `Price_Lag_1`, `Price_Lag_7`, and `Rolling_Mean_7` to estimate
+                price volatility intervals.
+              </p>
+              <button id="btn-retrain-price" class="btn-submit btn-amber" style="width: auto;">
+                <span>⚡ Retrain Price Quantum VQR</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quantum Circuit ASCII Schematic -->
+        <div class="card" style="margin-top: 20px;">
+          <div class="card-header">
+            <h3 class="card-title">⚛️ Live Parameterized Quantum Circuit (VQC) Schematic</h3>
+            <p class="card-desc">Executed on PennyLane and Qiskit simulator backends.</p>
+          </div>
+          <div class="card-body">
+            <div class="circuit-container">
+              <pre id="quantum-circuit-display" class="circuit-ascii">Loading Quantum Circuit Architecture...</pre>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- VIEW 10: GOVERNMENT SUPPORT & SCHEMES -->
+      <main class="view-content" id="view-government">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">🏛️ Government Procurement & Farmer Support Schemes</h1>
+            <p class="view-subtitle">Minimum Support Price (MSP 2024-25), PM-KISAN, PMFBY Crop Insurance Calculator, and
+              Mandi Procurement Planning.</p>
+          </div>
+        </div>
+
+        <div class="grid-two-columns">
+          <!-- MSP Reference Table -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">📋 Government Minimum Support Price (MSP 2024-25)</h3>
+              <p class="card-desc">Official benchmark procurement prices declared by CACP / Government of India.</p>
+            </div>
+            <div class="card-body">
+              <table class="table-styled">
+                <thead>
+                  <tr>
+                    <th>Commodity</th>
+                    <th>Type / Variety</th>
+                    <th>MSP (₹ / Quintal)</th>
+                    <th>Market Realization</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Paddy (Rice)</strong></td>
+                    <td>Common</td>
+                    <td><span class="badge badge-emerald">₹ 2,300</span></td>
+                    <td>₹ 2,450 - 2,800</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Paddy (Rice)</strong></td>
+                    <td>Grade A</td>
+                    <td><span class="badge badge-emerald">₹ 2,320</span></td>
+                    <td>₹ 2,600 - 3,100</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Cotton</strong></td>
+                    <td>Medium Staple</td>
+                    <td><span class="badge badge-emerald">₹ 7,121</span></td>
+                    <td>₹ 7,200 - 7,650</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Cotton</strong></td>
+                    <td>Long Staple</td>
+                    <td><span class="badge badge-emerald">₹ 7,521</span></td>
+                    <td>₹ 7,600 - 8,200</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Wheat</strong></td>
+                    <td>Rabi Standard</td>
+                    <td><span class="badge badge-emerald">₹ 2,275</span></td>
+                    <td>₹ 2,400 - 2,750</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Maize</strong></td>
+                    <td>Hybrid Kharif</td>
+                    <td><span class="badge badge-emerald">₹ 2,225</span></td>
+                    <td>₹ 2,250 - 2,500</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Groundnut</strong></td>
+                    <td>In Shell</td>
+                    <td><span class="badge badge-emerald">₹ 6,783</span></td>
+                    <td>₹ 6,900 - 7,400</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- PMFBY Crop Insurance & Subsidy Calculator -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🛡️ PMFBY Crop Insurance & Subsidy Estimator</h3>
+              <p class="card-desc">Pradhan Mantri Fasal Bima Yojana premium calculation (2% Kharif, 1.5% Rabi).</p>
+            </div>
+            <div class="card-body">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Insured Crop</label>
+                  <select id="ins-crop" class="form-control">
+                    <option value="Rice" data-sum="40000" data-rate="0.02">Paddy (Rice) - Sum: ₹40,000/acre</option>
+                    <option value="Cotton" data-sum="45000" data-rate="0.05">Cotton - Sum: ₹45,000/acre</option>
+                    <option value="Wheat" data-sum="35000" data-rate="0.015">Wheat - Sum: ₹35,000/acre</option>
+                    <option value="Chilli" data-sum="60000" data-rate="0.05">Chilli (Horticulture) - Sum: ₹60,000/acre
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Farm Area (Acres)</label>
+                  <input type="number" id="ins-area" class="form-control" value="5.0" step="0.5">
+                </div>
+              </div>
+
+              <div id="insurance-calc-output" class="insurance-box" style="margin-top: 16px;">
+                <div class="ins-row">
+                  <span>Total Sum Insured:</span>
+                  <strong id="ins-sum-total">₹ 2,00,000</strong>
+                </div>
+                <div class="ins-row">
+                  <span>Farmer Premium Share (2%):</span>
+                  <strong id="ins-farmer-premium" style="color: #34d399;">₹ 4,000</strong>
+                </div>
+                <div class="ins-row">
+                  <span>Government Subsidy (Central + State):</span>
+                  <strong id="ins-gov-subsidy" style="color: #818cf8;">₹ 16,000 (80%)</strong>
+                </div>
+                <div class="ins-row">
+                  <span>PM-KISAN Annual Benefit:</span>
+                  <strong style="color: #fbbf24;">₹ 6,000 / year (3 installments)</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- BACKEND CONNECTION & SETTINGS MODAL -->
+  <div id="backend-settings-modal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-title-icon">🌐</span>
+          <div>
+            <h3 class="modal-title">Backend API & System Connection</h3>
+            <p class="modal-subtitle">Monitor latency, wake up services, or connect a custom deployment</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="btn-close-backend-modal" aria-label="Close modal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Live Status Pill & Latency Card -->
+        <div class="status-telemetry-card">
+          <div class="status-telemetry-left">
+            <div class="telemetry-badge status-waking" id="modal-status-badge">
+              <span class="status-pulse-dot" id="modal-status-dot"></span>
+              <strong id="modal-status-text">Connecting to API...</strong>
+            </div>
+            <div class="telemetry-meta">
+              <span>Ping: <strong id="modal-ping-val">-- ms</strong></span>
+              <span>•</span>
+              <span>Engine: <strong id="modal-backend-type">PennyLane Simulator</strong></span>
+            </div>
+          </div>
+          <button type="button" class="btn-secondary btn-sm" id="btn-modal-ping-test"
+            title="Send a heartbeat ping to the backend">
+            ⚡ Ping / Wake Up
+          </button>
+        </div>
+
+        <!-- Render Free Tier Notice -->
+        <div class="render-notice-box">
+          <span class="notice-icon">ℹ️</span>
+          <div class="notice-text">
+            <strong>Render Free Tier Notice:</strong> The cloud backend automatically sleeps after 15 minutes of
+            inactivity. When accessed after being idle, the service takes <strong>30–50 seconds to wake up (cold
+              start)</strong>. Once awake, all requests respond instantly.
+          </div>
+        </div>
+
+        <!-- Target Backend URL Input -->
+        <div class="modal-form-group">
+          <label class="modal-label" for="input-custom-api-url">
+            <span>Target Backend API URL</span>
+            <small class="text-muted">(Saved in your browser storage)</small>
+          </label>
+          <div class="input-with-actions">
+            <input type="text" id="input-custom-api-url" class="modal-input"
+              placeholder="https://quantum-precision-agriculture-api.onrender.com" spellcheck="false">
+            <button type="button" class="btn-primary btn-emerald" id="btn-save-api-url">
+              💾 Save & Connect
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Preset Buttons -->
+        <div class="preset-links-group">
+          <span class="preset-label">Quick Presets:</span>
+          <button type="button" class="btn-preset" id="preset-render-default">🌐 Render Default Cloud</button>
+          <button type="button" class="btn-preset" id="preset-localhost">💻 Localhost (8000)</button>
+          <button type="button" class="btn-preset" id="preset-reset-default">🔄 Reset Default</button>
+        </div>
+
+        <!-- Status Log / Diagnostics -->
+        <div class="modal-diagnostics" id="modal-diagnostics-log">
+          <span id="modal-diag-timestamp">Ready</span>: <span id="modal-diag-msg">System initialized.</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <a href="https://quantum-precision-agriculture-api.onrender.com/docs" target="_blank" id="modal-swagger-link"
+          class="modal-link">
+          ⚡ Open FastAPI Swagger Docs ↗
+        </a>
+        <button type="button" class="btn-secondary" id="btn-modal-done">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- JavaScript Controller -->
+  <script src="js/app.js"></script>
+</body>
+
+</html>

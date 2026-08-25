@@ -1,0 +1,25 @@
+{
+  "name": "quantum-precision-agriculture-platform-frontend",
+  "version": "3.0.0",
+  "description": "Frontend web client for Quantum AI Precision Agriculture Decision Support Platform",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "serve -s ."
+  },
+  "keywords": [
+    "quantum-ai",
+    "precision-agriculture",
+    "fastapi",
+    "leaflet",
+    "charts"
+  ],
+  "author": "Surendra1579",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.4.14"
+  }
+}

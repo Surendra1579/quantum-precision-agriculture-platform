@@ -1,0 +1,35 @@
+"""
+Database Connection and Session Manager for SQLite using SQLAlchemy.
+"""
+
+from pathlib import Path
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+DB_PATH = BASE_DIR / "precision_agri.db"
+DATABASE_URL = f"sqlite:///{DB_PATH}"
+
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"check_same_thread": False}
+)
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+
+def get_db():
+    """FastAPI Dependency for database session management."""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+def init_db():
+    """Initializes all database tables on application startup."""
+    import database.models  # Ensure all models are registered
+    Base.metadata.create_all(bind=engine)
+    print("[OK] Database initialized successfully (SQLite).")
