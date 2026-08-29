@@ -74,23 +74,29 @@ def generate_recommendation_endpoint(
 
         # Log recommendation to Database
         if db:
-            log_recommendation(
-                db=db,
-                date_str=datetime.utcnow().strftime("%Y-%m-%d"),
-                recommended_crop=rec["farm_parameters"]["crop"],
-                variety=rec["farm_parameters"]["recommended_variety"],
-                expected_yield=rec["quantum_predictions"]["quantum_yield_hqnn"]["yield_per_acre_tons"],
-                expected_price=rec["quantum_predictions"]["quantum_price_vqr"]["predicted_mandi_price_inr_per_qtl"],
-                expected_profit=rec["economic_financial_outlook"]["net_expected_profit_inr"],
-                fertilizer_plan=rec["prescriptions"]["fertilizer_plan"],
-                irrigation_plan=rec["prescriptions"]["irrigation_plan"],
-                full_report=rec,
-                risk_level=rec["decision_confidence"]["overall_risk_level"],
-                confidence_score=rec["decision_confidence"]["quantum_composite_confidence_percent"]
-            )
+            try:
+                log_recommendation(
+                    db=db,
+                    date_str=datetime.utcnow().strftime("%Y-%m-%d"),
+                    recommended_crop=rec["farm_parameters"]["crop"],
+                    variety=rec["farm_parameters"]["recommended_variety"],
+                    expected_yield=rec["quantum_predictions"]["quantum_yield_hqnn"]["yield_per_acre_tons"],
+                    expected_price=rec["quantum_predictions"]["quantum_price_vqr"]["predicted_mandi_price_inr_per_qtl"],
+                    expected_profit=rec["economic_financial_outlook"]["net_expected_profit_inr"],
+                    fertilizer_plan=rec["prescriptions"]["fertilizer_plan"],
+                    irrigation_plan=rec["prescriptions"]["irrigation_plan"],
+                    full_report=rec,
+                    risk_level=rec["decision_confidence"]["overall_risk_level"],
+                    confidence_score=rec["decision_confidence"]["quantum_composite_confidence_percent"]
+                )
+            except Exception as db_err:
+                import logging
+                logging.getLogger("recommendation_api").warning(f"Failed to log recommendation to DB: {db_err}")
 
         return rec
     except Exception as e:
+        import logging
+        logging.getLogger("recommendation_api").error(f"Precision recommendation failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Precision Recommendation failed: {str(e)}")
 
 

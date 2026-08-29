@@ -294,10 +294,15 @@ def log_recommendation(
 
 
 def get_recommendations_history(db: Session, field_id: Optional[int] = None, limit: int = 20) -> List[Recommendations]:
-    query = db.query(Recommendations)
-    if field_id:
-        query = query.filter(Recommendations.field_id == field_id)
-    return query.order_by(Recommendations.created_at.desc()).limit(limit).all()
+    try:
+        query = db.query(Recommendations)
+        if field_id:
+            query = query.filter(Recommendations.field_id == field_id)
+        return query.order_by(Recommendations.created_at.desc()).limit(limit).all()
+    except Exception as e:
+        import logging
+        logging.getLogger("repository").warning(f"Error querying recommendation history: {e}")
+        return []
 
 
 # =========================================================

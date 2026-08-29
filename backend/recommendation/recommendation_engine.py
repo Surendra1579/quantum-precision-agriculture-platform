@@ -8,7 +8,11 @@ import logging
 from typing import Dict, Any, Optional
 from datetime import datetime
 
-from quantum.inference import quantum_engine
+try:
+    from quantum.inference import quantum_engine
+except Exception as q_err:
+    quantum_engine = None
+
 from satellite.satellite_service import satellite_service
 from soil.soil_service import soil_service
 from weather.weather_service import weather_service
@@ -83,7 +87,7 @@ class PrecisionRecommendationEngine:
         total_production_tons = round(quantum_yield_per_acre * area_acres, 2)
 
         try:
-            if quantum_engine.yield_model is not None:
+            if quantum_engine is not None and getattr(quantum_engine, "yield_model", None) is not None:
                 yield_res = quantum_engine.predict_crop_yield(
                     crop=crop_clean,
                     crop_year=crop_year,
@@ -113,7 +117,7 @@ class PrecisionRecommendationEngine:
         upper_price = 6900.0
 
         try:
-            if quantum_engine.price_model is not None:
+            if quantum_engine is not None and getattr(quantum_engine, "price_model", None) is not None:
                 now_date = datetime.utcnow()
                 price_res = quantum_engine.predict_commodity_price(
                     state=st_clean,

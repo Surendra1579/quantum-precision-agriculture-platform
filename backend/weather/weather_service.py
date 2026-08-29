@@ -192,6 +192,7 @@ class WeatherService:
         temp_c = 28.5
         temp_min = 22.0
         temp_max = 34.0
+        apparent_temp = round(temp_c + 1.5, 1)
         humidity = 68.0
         wind_kmh = 12.0
         wind_deg = 180

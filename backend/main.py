@@ -27,12 +27,11 @@ if str(BASE_DIR) not in sys.path:
 from database.connection import init_db, get_db
 from database.repository import get_all_fields, get_recent_predictions, get_all_farms, log_prediction
 
-# Quantum Inference & Training
-from quantum.inference import quantum_engine
-from quantum.train_crop_quantum import train_crop_yield_quantum
-from quantum.train_price_quantum import train_price_quantum
-from quantum.quantum_utils import get_circuit_metadata
-from quantum.config import QUANTUM_CIRCUIT_CFG, QUANTUM_DEVICE_CFG
+# Optional Quantum ML Engine
+try:
+    from quantum.inference import quantum_engine
+except Exception as e:
+    quantum_engine = None
 
 # Existing Services (Preserved for 100% Compatibility)
 from rainfall_service import get_annual_rainfall

@@ -30,6 +30,10 @@ def get_db():
 
 def init_db():
     """Initializes all database tables on application startup."""
-    import database.models  # Ensure all models are registered
-    Base.metadata.create_all(bind=engine)
-    print("[OK] Database initialized successfully (SQLite).")
+    try:
+        import database.models  # Ensure all models are registered
+        Base.metadata.create_all(bind=engine)
+        print("[OK] Database initialized successfully (SQLite).")
+    except Exception as e:
+        print(f"[WARNING] Database initialization warning: {e}")
+
